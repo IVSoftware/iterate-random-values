@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -9,29 +10,30 @@ namespace iterate_random_values
         static void Main(string[] args)
         {
             var testset = generateTestSet();
-            var ints =
-                testset
-                .Descendants()
-                .Select(xel => (int)xel)
-                .ToArray();
+            Console.WriteLine(testset.ToString());
+            Console.WriteLine();
+
             int sumOfAttributes =
                 testset
-                .Descendants()
-                .Sum(xel=>Convert.ToInt32(xel.Attribute("rand").Value));
-            { }
-            var xtexts =
-                testset
-                .Descendants()
-                .OfType<XText>()
-                .ToArray();
-            { }
-            // https://stackoverflow.com/a/4251360/5438626
+                .Descendants("rand")
+                .Sum(xrand=>(int)xrand);
+
+            Debug.Assert(
+                sumOfAttributes == 99, 
+                "Expecting seeded pseudorandom sequence to consistently produce 99");
+
             int sumOfElements =
                 testset
-                .Descendants()
-                .OfType<XText>()
-                .Sum(xtext => Convert.ToInt32(xtext.Value));
-            { }
+                .Descendants("xnode")
+                .Select(xel=>Convert.ToInt32(xel.Attribute("rand").Value))
+                .Sum(xtext => (int)xtext);
+
+            Debug.Assert(
+                sumOfElements == 99,
+                "Expecting seeded pseudorandom sequence to consistently produce 99");
+
+            Console.WriteLine($"Sum of attributes: {sumOfAttributes}");
+            Console.WriteLine($"Sum of elements  : {sumOfElements}");
         }
         private static XElement generateTestSet()
         {
@@ -48,17 +50,13 @@ namespace iterate_random_values
         private static XElement randoElement()
         {
             var rand = _rando.Next(1, 11);
-            return new XElement(
+            var xel = new XElement(
                 "xnode",
-                new XAttribute("rand", rand),
-                new XText(rand.ToString())
-            ); ;
+                new XAttribute("rand", rand),    // Attribute
+                new XElement("rand", rand)
+            );
+            return xel;
         }
         static Random _rando = new Random(Seed: 100);
-    }
-
-    static class Extensions
-    {
-
     }
 }
