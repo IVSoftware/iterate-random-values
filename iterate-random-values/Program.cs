@@ -19,6 +19,12 @@ namespace iterate_random_values
                 .Descendants()
                 .Sum(xel=>Convert.ToInt32(xel.Attribute("rand").Value));
             { }
+            var xtexts =
+                testset
+                .Descendants()
+                .OfType<XText>()
+                .ToArray();
+            { }
             // https://stackoverflow.com/a/4251360/5438626
             int sumOfElements =
                 testset
@@ -43,10 +49,10 @@ namespace iterate_random_values
         {
             var rand = _rando.Next(1, 11);
             return new XElement(
-                "xnode", 
-                rand,
-                new XAttribute("rand", rand)
-            );
+                "xnode",
+                new XAttribute("rand", rand),
+                new XText(rand.ToString())
+            ); ;
         }
         static Random _rando = new Random(Seed: 100);
     }
